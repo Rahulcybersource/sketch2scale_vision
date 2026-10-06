@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sketch2Scale — The Future of Product Creation</title>
+    <meta name="description" content="One platform where software and hardware products come to life. From first sketch to finished product. Sketch2Scale.">
+    <meta property="og:title" content="Sketch2Scale — The Future of Product Creation">
+    <meta property="og:description" content="The platform where the next generation of products — both digital and physical — come to life.">
+    <meta property="og:type" content="website">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ═══════════════════════════════════════
+           RESET & VARIABLES — BRIGHT PALETTE
+           ═══════════════════════════════════════ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            /* Backgrounds — warm, luminous whites */
+            --bg-white: #FEFEFE;
+            --bg-cream: #FFF9F5;
+            --bg-lavender: #F3F0FF;
+            --bg-mint: #ECFDF5;
+            --bg-rose: #FFF1F2;
+            --bg-sky: #F0F9FF;
+            --bg-amber: #FFFBEB;
+            --bg-dark: #0C0F1A;
+
+            /* Accent palette — punchy, saturated */
+            --orange: #FF5E2B;
+            --orange-light: #FFF0EB;
+            --orange-soft: rgba(255, 94, 43, 0.12);
+            --cyan: #0891B2;
+            --cyan-bright: #06B6D4;
+            --cyan-light: #ECFEFF;
+            --magenta: #E11D6C;
+            --magenta-light: #FFF0F5;
+            --yellow: #F59E0B;
+            --yellow-light: #FEF9C3;
+            --violet: #7C3AED;
+            --violet-light: #F3EEFF;
+            --lime: #16A34A;
+            --lime-light: #F0FDF4;
+
+            /* Text — deep navys */
+            --ink: #0A0F1C;
+            --ink-90: rgba(10, 15, 28, 0.9);
+            --ink-70: rgba(10, 15, 28, 0.7);
+            --ink-50: rgba(10, 15, 28, 0.5);
+            --ink-30: rgba(10, 15, 28, 0.3);
+            --ink-15: rgba(10, 15, 28, 0.15);
+            --ink-08: rgba(10, 15, 28, 0.06);
+            --white: #FFFFFF;
+
+            /* Fonts */
+            --heading: 'Syne', sans-serif;
+            --serif: 'Playfair Display', Georgia, serif;
+            --body: 'Space Grotesk', system-ui, sans-serif;
+
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --shadow-sm: 0 1px 3px rgba(10,15,28,0.06), 0 1px 2px rgba(10,15,28,0.04);
+            --shadow-md: 0 4px 16px rgba(10,15,28,0.08), 0 2px 4px rgba(10,15,28,0.04);
+            --shadow-lg: 0 12px 40px rgba(10,15,28,0.1), 0 4px 12px rgba(10,15,28,0.05);
+            --shadow-color: 0 8px 32px rgba(255, 94, 43, 0.15);
+        }
+
+        html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+        body {
+            background: var(--bg-white);
+            color: var(--ink);
+            font-family: var(--body);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        ::selection { background: var(--orange); color: var(--white); }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; display: block; }
+
+        /* ═══════════════════════════════════════
+           NOISE (very subtle on light)
+           ═══════════════════════════════════════ */
+        .noise {
+            position: fixed; inset: 0; z-index: 9999;
+            pointer-events: none; opacity: 0.018;
+        }
+
+        /* ═══════════════════════════════════════
+           CUSTOM CURSOR
+           ═══════════════════════════════════════ */
+        .cursor-dot {
+            position: fixed; top: 0; left: 0; z-index: 9998;
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: var(--orange);
+            pointer-events: none;
+            mix-blend-mode: multiply;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s var(--ease-out), height 0.3s var(--ease-out), background 0.3s;
+        }
+        .cursor-dot.hovering {
+            width: 48px; height: 48px;
+            background: var(--violet);
+        }
+        @media (hover: none) { .cursor-dot { display: none; } }
+
+        /* ═══════════════════════════════════════
+           LAYOUT
+           ═══════════════════════════════════════ */
+        .container { width: 100%; max-width: 1320px; margin: 0 auto; padding: 0 clamp(1.5rem, 4vw, 4rem); }
+        .container--narrow { max-width: 900px; }
+
+        /* ═══════════════════════════════════════
+           TYPOGRAPHY
+           ═══════════════════════════════════════ */
+        .label {
+            font-family: var(--body); font-size: 0.7rem; font-weight: 600;
+            letter-spacing: 0.25em; text-transform: uppercase; color: var(--ink-50);
+        }
+        .label--orange { color: var(--orange); }
+        .label--cyan { color: var(--cyan); }
+        .label--magenta { color: var(--magenta); }
+        .label--violet { color: var(--violet); }
+
+        .section-number {
+            font-family: var(--heading); font-size: clamp(4rem, 8vw, 8rem);
+            font-weight: 800; color: var(--ink-08); line-height: 1; user-select: none;
+        }
+
+        .headline {
+            font-family: var(--heading); font-weight: 800;
+            line-height: 1.08; letter-spacing: -0.02em; color: var(--ink);
+        }
+        .headline--xl { font-size: clamp(2.8rem, 6vw, 5.5rem); }
+        .headline--lg { font-size: clamp(2.2rem, 4.5vw, 4rem); }
+        .headline--md { font-size: clamp(1.8rem, 3.5vw, 3rem); }
+
+        .serif-statement {
+            font-family: var(--serif); font-style: italic; font-weight: 400;
+            font-size: clamp(1.3rem, 2.5vw, 2rem); line-height: 1.4; color: var(--ink-70);
+        }
+        .body-text {
+            font-size: clamp(1rem, 1.1vw, 1.15rem); line-height: 1.75;
+            color: var(--ink-70); max-width: 620px;
+        }
+
+        .accent-orange { color: var(--orange); }
+        .accent-cyan { color: var(--cyan); }
+        .accent-magenta { color: var(--magenta); }
+        .accent-yellow { color: var(--yellow); }
+        .accent-violet { color: var(--violet); }
+        .accent-lime { color: var(--lime); }
+
+        /* ═══════════════════════════════════════
+           NAV — Transparent → Frosted White
+           ═══════════════════════════════════════ */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 1.5rem 0; transition: all 0.4s;
+        }
+        .nav.scrolled {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 1px 0 var(--ink-08);
+        }
+        .nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-logo {
+            font-family: var(--heading); font-weight: 800;
+            font-size: 1.1rem; letter-spacing: 0.08em; color: var(--ink);
+            display: flex;
+            align-items: center;
+        }
+        .nav-logo span { color: var(--orange); }
+        .nav-logo img { height: 48px; width: auto; object-fit: contain; }
+        .nav-right { display: flex; align-items: center; gap: 2rem; }
+        .nav-link {
+            font-size: 0.8rem; font-weight: 500; letter-spacing: 0.06em;
+            color: var(--ink-50); text-transform: uppercase; transition: color 0.3s;
+        }
+        .nav-link:hover { color: var(--orange); }
+        .nav-cta {
+            font-family: var(--heading); font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            padding: 0.7rem 1.6rem; background: var(--orange);
+            color: var(--white); border-radius: 100px; border: none;
+            transition: all 0.3s var(--ease-out); position: relative; overflow: hidden;
+            box-shadow: var(--shadow-color);
+        }
+        .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,94,43,0.25); }
+        .nav-cta:active { transform: scale(0.97); }
+
+        /* ═══════════════════════════════════════
+           HERO — Bright gradient wash
+           ═══════════════════════════════════════ */
+        .hero {
+            min-height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            position: relative; padding: 8rem 2rem 4rem; overflow: hidden;
+            background: linear-gradient(175deg, #FFF9F5 0%, #FFF0EB 25%, #F3F0FF 50%, #ECFEFF 75%, #F0FDF4 100%);
+        }
+        .hero-grid {
+            position: absolute; inset: 0;
+            background-image:
+                radial-gradient(circle at 25% 35%, rgba(255, 94, 43, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 65%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(6, 182, 212, 0.07) 0%, transparent 40%),
+                radial-gradient(var(--ink-15) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px;
+            opacity: 0.5;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, black, transparent);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, black, transparent);
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.45rem 1.2rem; background: var(--white);
+            border: 1px solid var(--ink-08); border-radius: 100px;
+            font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--ink-50);
+            margin-bottom: 3rem; opacity: 0; box-shadow: var(--shadow-sm);
+        }
+        .hero-badge .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--lime); animation: pulse-dot 2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.5); }
+        }
+        .hero-title { position: relative; z-index: 1; }
+        .hero-title .line {
+            display: block; font-family: var(--heading); font-weight: 800;
+            font-size: clamp(3.5rem, 11vw, 11rem); line-height: 0.92;
+            letter-spacing: -0.03em; text-transform: uppercase;
+            color: var(--ink); overflow: hidden;
+        }
+        .hero-title .line span { display: inline-block; transform: translateY(110%); }
+        .hero-title .line .two { color: var(--orange); font-size: 0.85em; }
+        .hero-tagline {
+            font-family: var(--serif); font-style: italic;
+            font-size: clamp(1.1rem, 2vw, 1.6rem); color: var(--ink-70);
+            margin-top: 2.5rem; max-width: 600px; opacity: 0;
+        }
+        .hero-scroll {
+            position: absolute; bottom: 2.5rem;
+            display: flex; flex-direction: column; align-items: center; gap: 0.5rem; opacity: 0;
+        }
+        .hero-scroll span {
+            font-size: 0.65rem; font-weight: 500; letter-spacing: 0.2em;
+            text-transform: uppercase; color: var(--ink-30);
+        }
+        .scroll-line {
+            width: 1px; height: 48px;
+            background: linear-gradient(to bottom, var(--orange), transparent);
+            animation: scroll-pulse 2s ease-in-out infinite;
+        }
+        @keyframes scroll-pulse {
+            0%, 100% { transform: scaleY(1); opacity: 1; }
+            50% { transform: scaleY(0.5); opacity: 0.3; }
+        }
+
+        /* ═══════════════════════════════════════
+           MARQUEE — Saturated bands
+           ═══════════════════════════════════════ */
+        .marquee-wrap {
+            overflow: hidden; padding: 1.2rem 0;
+            background: var(--orange);
+            transform: rotate(-1deg) scale(1.02);
+            margin: -0.5rem 0; position: relative; z-index: 2;
+        }
+        .marquee-wrap--reverse {
+            background: var(--violet);
+            transform: rotate(1deg) scale(1.02); margin-top: -1.5rem;
+        }
+        .marquee-track {
+            display: flex; width: max-content;
+            animation: marquee-scroll 30s linear infinite;
+        }
+        .marquee-wrap--reverse .marquee-track { animation-direction: reverse; animation-duration: 35s; }
+        .marquee-item {
+            font-family: var(--heading); font-weight: 800; font-size: 0.85rem;
+            letter-spacing: 0.15em; text-transform: uppercase; color: var(--white);
+            white-space: nowrap; padding: 0 2rem;
+            display: flex; align-items: center; gap: 2rem;
+        }
+        .marquee-item .sep {
+            width: 6px; height: 6px; background: var(--white);
+            border-radius: 50%; opacity: 0.4; flex-shrink: 0;
+        }
+        @keyframes marquee-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* ═══════════════════════════════════════
+           SECTIONS — COMMON
+           ═══════════════════════════════════════ */
+        section { position: relative; padding: clamp(5rem, 12vh, 10rem) 0; }
+        .section-rule { width: 64px; height: 2px; background: var(--orange); margin-bottom: 1.5rem; border-radius: 1px; }
+        .section-header { margin-bottom: clamp(2rem, 5vh, 4rem); }
+        .reveal { opacity: 0; transform: translateY(40px); }
+
+        /* ═══════════════════════════════════════
+           01 — PROBLEM — Warm cream
+           ═══════════════════════════════════════ */
+        .problem { background: var(--bg-cream); }
+        .problem-grid {
+            display: grid; grid-template-columns: auto 1fr;
+            gap: 2rem 4rem; align-items: start;
+        }
+        .problem-statements { display: flex; flex-direction: column; gap: 2.5rem; }
+        .problem-statement {
+            font-family: var(--heading); font-weight: 700;
+            font-size: clamp(1.4rem, 2.8vw, 2.4rem); line-height: 1.3; color: var(--ink);
+        }
+        .problem-statement em { font-style: normal; color: var(--orange); }
+
+        /* ═══════════════════════════════════════
+           02 — VISION — Lavender wash & Triad
+           ═══════════════════════════════════════ */
+        .vision {
+            padding: clamp(6rem, 12vh, 9rem) 0;
+            display: flex; align-items: center;
+            background: linear-gradient(180deg, var(--bg-lavender) 0%, #EDE9FF 100%);
+            position: relative;
+        }
+        .vision-content { text-align: center; max-width: 1180px; margin: 0 auto; width: 100%; }
+        .vision-lead {
+            font-family: var(--heading);
+            font-size: clamp(2.2rem, 4vw, 3.2rem);
+            font-weight: 700;
+            line-height: 1.18;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+            max-width: 840px;
+            margin: 0 auto 1.25rem;
+        }
+        .vision-sublead {
+            font-family: var(--body);
+            font-size: clamp(1.05rem, 1.35vw, 1.25rem);
+            color: var(--ink-70);
+            max-width: 650px;
+            margin: 0 auto clamp(2.5rem, 5vh, 3.5rem);
+            line-height: 1.65;
+        }
+        .vision-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.75rem;
+            text-align: left;
+            margin-bottom: 2.75rem;
+        }
+        .vision-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(124, 58, 237, 0.12);
+            border-radius: 20px;
+            padding: clamp(1.75rem, 2.5vw, 2.25rem);
+            box-shadow: 0 8px 24px rgba(10, 15, 28, 0.04);
+            transition: all 0.35s var(--ease-out);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        .vision-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            border-radius: 20px 20px 0 0;
+        }
+        .vision-card--cyan::before { background: var(--cyan-bright); }
+        .vision-card--magenta::before { background: var(--magenta); }
+        .vision-card--violet::before { background: var(--violet); }
+        .vision-card:hover {
+            transform: translateY(-5px);
+            background: #ffffff;
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(124, 58, 237, 0.25);
+        }
+        .vision-card-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 0.35rem 0.8rem;
+            border-radius: 100px;
+            margin-bottom: 1.25rem;
+            width: fit-content;
+        }
+        .vision-card--cyan .vision-card-tag { background: var(--cyan-light); color: var(--cyan); }
+        .vision-card--magenta .vision-card-tag { background: var(--magenta-light); color: var(--magenta); }
+        .vision-card--violet .vision-card-tag { background: var(--violet-light); color: var(--violet); }
+        .vision-card-title {
+            font-family: var(--heading);
+            font-size: clamp(1.25rem, 1.8vw, 1.45rem);
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--ink);
+            margin-bottom: 0.85rem;
+        }
+        .vision-card-desc {
+            font-family: var(--body);
+            font-size: 0.95rem;
+            line-height: 1.65;
+            color: var(--ink-70);
+            flex-grow: 1;
+            margin-bottom: 1.5rem;
+        }
+        .vision-card-flow {
+            padding-top: 1rem;
+            border-top: 1px dashed var(--ink-08);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .vision-card--cyan .vision-card-flow { color: var(--cyan); }
+        .vision-card--magenta .vision-card-flow { color: var(--magenta); }
+        .vision-card--violet .vision-card-flow { color: var(--violet); }
+        .vision-footer-quote {
+            font-family: var(--serif);
+            font-style: italic;
+            font-size: clamp(1.1rem, 1.7vw, 1.35rem);
+            color: var(--ink-70);
+            max-width: 680px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* ═══════════════════════════════════════
+           03 — MARKET — White + Cards
+           ═══════════════════════════════════════ */
+        .market { background: var(--bg-white); }
+        .market-intro { text-align: center; margin-bottom: clamp(3rem, 6vh, 5rem); }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+        .stat-card {
+            padding: clamp(2rem, 3vw, 3rem); background: var(--white);
+            border-radius: 16px; text-align: center; position: relative; overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.4s var(--ease-out), box-shadow 0.4s;
+        }
+        .stat-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 16px 16px 0 0;
+        }
+        .stat-card:nth-child(1) { background: linear-gradient(180deg, var(--orange-light) 0%, var(--white) 40%); }
+        .stat-card:nth-child(1)::before { background: var(--orange); }
+        .stat-card:nth-child(2) { background: linear-gradient(180deg, var(--cyan-light) 0%, var(--white) 40%); }
+        .stat-card:nth-child(2)::before { background: var(--cyan-bright); }
+        .stat-card:nth-child(3) { background: linear-gradient(180deg, var(--magenta-light) 0%, var(--white) 40%); }
+        .stat-card:nth-child(3)::before { background: var(--magenta); }
+        .stat-number {
+            font-family: var(--heading); font-weight: 800;
+            font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1; margin-bottom: 0.75rem;
+        }
+        .stat-card:nth-child(1) .stat-number { color: var(--orange); }
+        .stat-card:nth-child(2) .stat-number { color: var(--cyan); }
+        .stat-card:nth-child(3) .stat-number { color: var(--magenta); }
+        .stat-label { font-size: 0.95rem; color: var(--ink-70); line-height: 1.5; }
+        .stat-source { font-size: 0.65rem; color: var(--ink-30); margin-top: 1rem; letter-spacing: 0.05em; }
+
+        /* ═══════════════════════════════════════
+           04 — PILLARS — Alternating soft tints
+           ═══════════════════════════════════════ */
+        .pillars { background: var(--bg-sky); }
+        .pillar-row {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: clamp(3rem, 6vw, 6rem); align-items: center;
+            margin-bottom: clamp(6rem, 12vh, 10rem);
+        }
+        .pillar-row:last-child { margin-bottom: 0; }
+        .pillar-row--reverse .pillar-visual { order: -1; }
+        .pillar-visual {
+            aspect-ratio: 4/3; border-radius: 20px; position: relative; overflow: hidden;
+            box-shadow: 0 16px 40px rgba(10, 15, 28, 0.1), 0 4px 12px rgba(10, 15, 28, 0.05);
+            border: 1px solid rgba(10, 15, 28, 0.08);
+            background: #ffffff;
+            transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+        }
+        .pillar-visual:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 50px rgba(10, 15, 28, 0.16), 0 8px 20px rgba(10, 15, 28, 0.08);
+        }
+        .pillar-visual-img {
+            width: 100%; height: 100%; object-fit: cover; object-position: top center;
+            display: block; transition: transform 0.6s var(--ease-out);
+        }
+        .pillar-visual:hover .pillar-visual-img {
+            transform: scale(1.03);
+        }
+        .pillar-badge-overlay {
+            position: absolute; bottom: 1.25rem; right: 1.25rem; z-index: 2;
+            background: rgba(10, 15, 28, 0.88); backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #ffffff; padding: 0.45rem 0.95rem; border-radius: 100px;
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            pointer-events: none;
+        }
+        .pillar-badge-overlay .badge-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+        }
+        .pillar-badge-overlay--cyan .badge-dot { background: var(--cyan-bright); box-shadow: 0 0 8px var(--cyan-bright); }
+        .pillar-badge-overlay--magenta .badge-dot { background: var(--magenta); box-shadow: 0 0 8px var(--magenta); }
+
+        .pillar-content { display: flex; flex-direction: column; gap: 1.5rem; }
+        .pillar-features { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; }
+        .pillar-feature {
+            display: flex; align-items: flex-start; gap: 0.75rem;
+            font-size: 0.95rem; color: var(--ink-70); line-height: 1.5;
+        }
+        .pillar-feature .marker {
+            width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 0.5rem;
+        }
+        .marker--cyan { background: var(--cyan-bright); }
+        .marker--magenta { background: var(--magenta); }
+
+        /* ═══════════════════════════════════════
+           05 — JUNCTION — Bold gradient (dark contrast)
+           ═══════════════════════════════════════ */
+        .junction {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            text-align: center; position: relative; overflow: hidden;
+            background: linear-gradient(135deg, #0C1445 0%, #1A0A2E 30%, #2D0A1E 70%, #1A0A2E 100%);
+            color: var(--white);
+        }
+        .junction .headline { color: var(--white); }
+        .junction .serif-statement { color: rgba(255,255,255,0.7); }
+        .junction .body-text { color: rgba(255,255,255,0.6); }
+        .junction .label { color: rgba(255,255,255,0.4); }
+        .junction .section-rule { background: rgba(255,255,255,0.2); }
+
+        .junction-bg {
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(6,182,212,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(225,29,108,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(124,58,237,0.1) 0%, transparent 40%);
+        }
+        .junction-content { position: relative; z-index: 1; max-width: 1000px; padding: 0 2rem; }
+        .junction-convergence {
+            position: relative; height: 2px; max-width: 600px; margin: 3rem auto;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .convergence-line {
+            position: absolute; top: 0; height: 100%; width: 0%;
+            transition: width 1.5s var(--ease-out);
+        }
+        .convergence-line--left { left: 0; background: linear-gradient(to right, transparent, var(--cyan-bright)); }
+        .convergence-line--right { right: 0; background: linear-gradient(to left, transparent, var(--magenta)); }
+        .convergence-dot {
+            width: 10px; height: 10px; border-radius: 50%; background: var(--white);
+            box-shadow: 0 0 24px var(--white), 0 0 60px rgba(255,255,255,0.3);
+            opacity: 0; position: relative; z-index: 1; transition: opacity 0.5s 1.2s;
+        }
+        .junction.active .convergence-line { width: 50%; }
+        .junction.active .convergence-dot { opacity: 1; }
+
+        .junction-quote {
+            font-family: var(--serif); font-style: italic;
+            font-size: clamp(1rem, 1.5vw, 1.2rem); color: rgba(255,255,255,0.4);
+            margin-top: 3rem; max-width: 500px; margin-left: auto; margin-right: auto;
+        }
+        .junction-quote cite {
+            display: block; font-style: normal; font-family: var(--body);
+            font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+            color: rgba(255,255,255,0.3); margin-top: 0.75rem;
+        }
+
+        /* ═══════════════════════════════════════
+           06 — WHY NOW — Mint green
+           ═══════════════════════════════════════ */
+        .why-now { background: var(--bg-mint); }
+        .why-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        .why-card {
+            padding: clamp(2rem, 3vw, 2.5rem); background: var(--white);
+            border-radius: 16px; box-shadow: var(--shadow-sm);
+            transition: transform 0.3s var(--ease-out), box-shadow 0.4s;
+            border: 1px solid transparent;
+        }
+        .why-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .why-card:nth-child(1):hover { border-color: rgba(255,94,43,0.2); }
+        .why-card:nth-child(2):hover { border-color: rgba(124,58,237,0.2); }
+        .why-card:nth-child(3):hover { border-color: rgba(6,182,212,0.2); }
+        .why-card:nth-child(4):hover { border-color: rgba(245,158,11,0.2); }
+        .why-card-number {
+            font-family: var(--heading); font-weight: 800; font-size: 2.5rem;
+            line-height: 1; margin-bottom: 1.5rem;
+        }
+        .why-card:nth-child(1) .why-card-number { color: var(--orange); }
+        .why-card:nth-child(2) .why-card-number { color: var(--violet); }
+        .why-card:nth-child(3) .why-card-number { color: var(--cyan); }
+        .why-card:nth-child(4) .why-card-number { color: var(--yellow); }
+        .why-card-title {
+            font-family: var(--heading); font-weight: 700;
+            font-size: 1.2rem; margin-bottom: 0.75rem; color: var(--ink);
+        }
+        .why-card-text { font-size: 0.9rem; color: var(--ink-70); line-height: 1.7; }
+
+        /* ═══════════════════════════════════════
+           07 — ROADMAP — Rose tint
+           ═══════════════════════════════════════ */
+        .roadmap { background: var(--bg-rose); }
+        .phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .phase {
+            padding: 2.5rem 2rem; background: var(--white); border-radius: 16px;
+            box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+            transition: transform 0.3s var(--ease-out), box-shadow 0.4s;
+        }
+        .phase:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .phase::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 16px 16px 0 0;
+        }
+        .phase:nth-child(1)::before { background: var(--orange); }
+        .phase:nth-child(2)::before { background: var(--cyan-bright); }
+        .phase:nth-child(3)::before { background: var(--magenta); }
+        .phase-label {
+            font-size: 0.65rem; font-weight: 600; letter-spacing: 0.2em;
+            text-transform: uppercase; color: var(--ink-30); margin-bottom: 1rem;
+        }
+        .phase-title {
+            font-family: var(--heading); font-weight: 700;
+            font-size: 1.4rem; margin-bottom: 1rem; color: var(--ink);
+        }
+        .phase-text { font-size: 0.88rem; color: var(--ink-70); line-height: 1.7; }
+
+        /* ═══════════════════════════════════════
+           08 — IMPACT — Amber warmth
+           ═══════════════════════════════════════ */
+        .impact { background: var(--bg-amber); }
+        .impact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: clamp(2rem, 4vh, 3rem); }
+        .impact-card {
+            padding: 2rem; background: var(--white); border-radius: 16px;
+            box-shadow: var(--shadow-sm); border-left: 4px solid transparent;
+            transition: transform 0.3s var(--ease-out), box-shadow 0.4s;
+        }
+        .impact-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .impact-card:nth-child(1) { border-left-color: var(--yellow); }
+        .impact-card:nth-child(2) { border-left-color: var(--violet); }
+        .impact-card:nth-child(3) { border-left-color: var(--lime); }
+        .impact-card-title {
+            font-family: var(--heading); font-weight: 700;
+            font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--ink);
+        }
+        .impact-card-text { font-size: 0.88rem; color: var(--ink-70); line-height: 1.7; }
+
+        /* ═══════════════════════════════════════
+           CLOSE — Deep dark contrast
+           ═══════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+           CLOSE & CONTACT — Deep dark contrast
+           ═══════════════════════════════════════ */
+        .close-section {
+            min-height: 85vh; display: flex; align-items: center; justify-content: center;
+            text-align: center; position: relative; overflow: hidden;
+            padding: clamp(6rem, 12vh, 10rem) 0;
+            background: linear-gradient(180deg, #0C0F1A 0%, #1A0A2E 100%);
+            color: var(--white);
+        }
+        .close-content { position: relative; z-index: 1; max-width: 960px; padding: 0 1.5rem; width: 100%; }
+        .close-pre {
+            font-family: var(--serif); font-style: italic;
+            font-size: clamp(1.2rem, 2vw, 1.6rem); color: rgba(255,255,255,0.45); margin-bottom: 1.25rem;
+        }
+        .close-headline {
+            font-family: var(--heading); font-weight: 800;
+            font-size: clamp(2.3rem, 5vw, 4.2rem); line-height: 1.15;
+            letter-spacing: -0.02em; margin-bottom: 1.25rem; color: var(--white);
+        }
+        .close-headline .accent-orange { color: var(--orange); }
+        .close-subtext {
+            font-family: var(--body); font-size: clamp(1rem, 1.25vw, 1.15rem);
+            color: rgba(255,255,255,0.65); max-width: 600px;
+            margin: 0 auto clamp(2.5rem, 5vh, 3.5rem); line-height: 1.6;
+        }
+
+        .contact-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.75rem;
+            max-width: 860px; margin: 0 auto; text-align: left;
+        }
+        .contact-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: clamp(1.75rem, 2.5vw, 2.25rem);
+            transition: all 0.35s var(--ease-out); display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+        }
+        .contact-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 94, 43, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+        }
+        .contact-card-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+            padding: 0.35rem 0.8rem; border-radius: 100px; margin-bottom: 1.25rem; width: fit-content;
+        }
+        .contact-card--email .contact-card-badge { background: rgba(255, 94, 43, 0.18); color: #FF7A50; }
+        .contact-card--phone .contact-card-badge { background: rgba(34, 197, 94, 0.18); color: #4ADE80; }
+        .contact-card-value {
+            font-family: var(--heading); font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+            font-weight: 700; color: #FFFFFF; line-height: 1.35; margin-bottom: 0.5rem;
+            word-break: break-all;
+        }
+        .contact-card-note {
+            font-size: 0.88rem; color: rgba(255,255,255,0.6); line-height: 1.5;
+            margin-bottom: 1.5rem; flex-grow: 1;
+        }
+        .contact-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+        .btn-contact {
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            padding: 0.65rem 1.25rem; border-radius: 100px;
+            font-family: var(--heading); font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none;
+            transition: all 0.25s var(--ease-out); cursor: pointer; border: none;
+        }
+        .btn-contact--primary {
+            background: var(--orange); color: var(--white);
+            box-shadow: 0 4px 16px rgba(255,94,43,0.3);
+        }
+        .btn-contact--primary:hover {
+            transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,94,43,0.45);
+        }
+        .btn-contact--whatsapp {
+            background: #25D366; color: #FFFFFF;
+            box-shadow: 0 4px 16px rgba(37,211,102,0.25);
+        }
+        .btn-contact--whatsapp:hover {
+            transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,211,102,0.4);
+        }
+        .btn-contact--ghost {
+            background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .btn-contact--ghost:hover {
+            background: rgba(255, 255, 255, 0.15); color: #fff; transform: translateY(-2px);
+        }
+        .btn-contact:active { transform: scale(0.97); }
+
+        /* CONTACT MODAL */
+        .contact-modal-backdrop {
+            position: fixed; inset: 0; z-index: 10000;
+            background: rgba(10, 15, 28, 0.75);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .contact-modal-backdrop.open {
+            opacity: 1; pointer-events: auto;
+        }
+        .contact-modal {
+            background: #0E1322;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px; padding: clamp(2rem, 4vw, 2.75rem);
+            max-width: 580px; width: 100%; color: var(--white);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+            transform: scale(0.95) translateY(20px);
+            transition: transform 0.3s var(--ease-out);
+            position: relative; text-align: left;
+        }
+        .contact-modal-backdrop.open .contact-modal {
+            transform: scale(1) translateY(0);
+        }
+        .modal-close-btn {
+            position: absolute; top: 1.25rem; right: 1.25rem;
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08); border: none;
+            color: rgba(255, 255, 255, 0.6); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; transition: all 0.2s;
+        }
+        .modal-close-btn:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
+        .modal-title {
+            font-family: var(--heading); font-size: 1.6rem; font-weight: 700;
+            margin-bottom: 0.5rem; color: #FFFFFF;
+        }
+        .modal-sub {
+            font-size: 0.95rem; color: rgba(255,255,255,0.6); margin-bottom: 1.75rem;
+            line-height: 1.5;
+        }
+        .modal-options { display: flex; flex-direction: column; gap: 1rem; }
+        .modal-option-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px; padding: 1.25rem 1.5rem;
+            display: flex; flex-direction: column; gap: 0.75rem;
+        }
+        .modal-option-header {
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-option-tag {
+            font-size: 0.68rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+        }
+        .modal-option-tag--email { color: #FF7A50; }
+        .modal-option-tag--phone { color: #4ADE80; }
+        .modal-option-val {
+            font-family: var(--heading); font-size: 1.05rem; font-weight: 600;
+            color: #fff; word-break: break-all;
+        }
+        .close-watermark {
+            position: absolute; bottom: -3vw; left: 50%; transform: translateX(-50%);
+            font-family: var(--heading); font-weight: 800;
+            font-size: clamp(5rem, 15vw, 16rem); letter-spacing: 0.05em;
+            text-transform: uppercase; color: rgba(255,255,255,0.04);
+            white-space: nowrap; user-select: none; pointer-events: none;
+        }
+
+        /* ═══════════════════════════════════════
+           FOOTER
+           ═══════════════════════════════════════ */
+        .footer {
+            padding: 3rem 0; border-top: 1px solid var(--ink-08); background: var(--bg-white);
+        }
+        .footer .container { display: flex; justify-content: space-between; align-items: center; }
+        .footer-left { font-size: 0.75rem; color: var(--ink-30); letter-spacing: 0.05em; }
+        .footer-right { display: flex; gap: 2rem; }
+        .footer-link {
+            font-size: 0.75rem; color: var(--ink-30); letter-spacing: 0.05em; transition: color 0.3s;
+        }
+        .footer-link:hover { color: var(--orange); }
+
+        /* ═══════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .vision-cards { grid-template-columns: 1fr; max-width: 520px; margin-left: auto; margin-right: auto; }
+            .pillar-row { grid-template-columns: 1fr; gap: 2rem; }
+            .pillar-row--reverse .pillar-visual { order: 0; }
+            .stats-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+            .phases { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; }
+            .why-grid { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; }
+            .impact-grid { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; }
+        }
+        @media (max-width: 768px) {
+            .contact-grid { grid-template-columns: 1fr; max-width: 480px; }
+            .problem-grid { grid-template-columns: 1fr; }
+            .section-number { font-size: clamp(3rem, 15vw, 5rem); }
+            .nav-right { gap: 1rem; }
+            .nav-link { display: none; }
+            .footer .container { flex-direction: column; gap: 1rem; text-align: center; }
+            .footer-right { flex-wrap: wrap; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ NOISE OVERLAY ═══ -->
+    <svg class="noise" aria-hidden="true">
+        <filter id="noiseFilter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noiseFilter)"/>
+    </svg>
+
+    <!-- ═══ CURSOR ═══ -->
+    <div class="cursor-dot" id="cursorDot"></div>
+
+    <!-- ═══════════════════════════════════════
+         NAVIGATION
+         ═══════════════════════════════════════ -->
+    <nav class="nav" id="mainNav">
+        <div class="container">
+            <a href="#" class="nav-logo">
+                <img src="logo.png" alt="Sketch2Scale Logo" />
+            </a>
+            <div class="nav-right">
+                <a href="#vision" class="nav-link hoverable">Vision</a>
+                <a href="#market" class="nav-link hoverable">Opportunity</a>
+                <a href="#roadmap" class="nav-link hoverable">Roadmap</a>
+                <a href="#contact" class="nav-cta hoverable">Get in Touch</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════
+         HERO
+         ═══════════════════════════════════════ -->
+    <header class="hero" id="hero">
+        <div class="hero-grid"></div>
+        <div class="hero-badge" id="heroBadge">
+            <span class="dot"></span>
+            Now Building
+        </div>
+        <h1 class="hero-title" style="display: flex; justify-content: center; margin-bottom: 1rem;">
+            <span class="line" style="display: block; height: clamp(6rem, 22vw, 16rem);">
+                <span style="height: 100%; display: inline-block;">
+                    <img src="logo.png" alt="Sketch2Scale Logo" style="height: 100%; width: auto; max-width: 90vw; object-fit: contain; filter: drop-shadow(0 8px 24px rgba(10,15,28,0.1));" />
+                </span>
+            </span>
+        </h1>
+        <p class="hero-tagline" id="heroTagline">
+            The platform where the next generation of products&thinsp;—&thinsp;both digital and physical&thinsp;—&thinsp;come to life.
+        </p>
+        <div class="hero-scroll" id="heroScroll">
+            <span>Scroll</span>
+            <div class="scroll-line"></div>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         MARQUEE
+         ═══════════════════════════════════════ -->
+    <div class="marquee-wrap" aria-hidden="true">
+        <div class="marquee-track">
+            <span class="marquee-item">Software × Hardware <span class="sep"></span></span>
+            <span class="marquee-item">The Future is Physical <span class="sep"></span></span>
+            <span class="marquee-item">From Idea to Reality <span class="sep"></span></span>
+            <span class="marquee-item">One Platform <span class="sep"></span></span>
+            <span class="marquee-item">End to End Creation <span class="sep"></span></span>
+            <span class="marquee-item">Where Bits Meet Atoms <span class="sep"></span></span>
+            <span class="marquee-item">Software × Hardware <span class="sep"></span></span>
+            <span class="marquee-item">The Future is Physical <span class="sep"></span></span>
+            <span class="marquee-item">From Idea to Reality <span class="sep"></span></span>
+            <span class="marquee-item">One Platform <span class="sep"></span></span>
+            <span class="marquee-item">End to End Creation <span class="sep"></span></span>
+            <span class="marquee-item">Where Bits Meet Atoms <span class="sep"></span></span>
+        </div>
+    </div>
+    <div class="marquee-wrap marquee-wrap--reverse" aria-hidden="true">
+        <div class="marquee-track">
+            <span class="marquee-item">Sketch It. Build It. Ship It. <span class="sep"></span></span>
+            <span class="marquee-item">$200B+ Combined Market <span class="sep"></span></span>
+            <span class="marquee-item">Physical AI Era <span class="sep"></span></span>
+            <span class="marquee-item">Zero Fragmentation <span class="sep"></span></span>
+            <span class="marquee-item">85M Developer Gap by 2030 <span class="sep"></span></span>
+            <span class="marquee-item">Creation Reimagined <span class="sep"></span></span>
+            <span class="marquee-item">Sketch It. Build It. Ship It. <span class="sep"></span></span>
+            <span class="marquee-item">$200B+ Combined Market <span class="sep"></span></span>
+            <span class="marquee-item">Physical AI Era <span class="sep"></span></span>
+            <span class="marquee-item">Zero Fragmentation <span class="sep"></span></span>
+            <span class="marquee-item">85M Developer Gap by 2030 <span class="sep"></span></span>
+            <span class="marquee-item">Creation Reimagined <span class="sep"></span></span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         01 — THE PROBLEM
+         ═══════════════════════════════════════ -->
+    <section class="problem" id="problem">
+        <div class="container">
+            <div class="problem-grid">
+                <div>
+                    <div class="section-number reveal">01</div>
+                </div>
+                <div>
+                    <div class="section-header">
+                        <div class="section-rule reveal"></div>
+                        <p class="label label--orange reveal">The Fracture</p>
+                    </div>
+                    <div class="problem-statements">
+                        <p class="problem-statement reveal">
+                            Building a product today means juggling <em>fifteen disconnected tools</em> — each one a dead end.
+                        </p>
+                        <p class="problem-statement reveal">
+                            Design lives in one place. Code in another. Hardware in a third.
+                            <em>Every handoff is a translation. Every translation is a loss.</em>
+                        </p>
+                        <p class="problem-statement reveal">
+                            By the time a product ships, it barely resembles the original vision.
+                        </p>
+                        <p class="body-text reveal" style="margin-top: 1rem;">
+                            The world has 47 million developers — and an 85 million talent gap projected by 2030. We cannot close that gap by training more people to use more fragmented tools. We need a fundamentally different approach.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         02 — THE VISION
+         ═══════════════════════════════════════ -->
+    <section class="vision" id="vision">
+        <div class="container">
+            <div class="vision-content">
+                <div class="section-rule reveal" style="margin: 0 auto 1.5rem;"></div>
+                <p class="label label--violet reveal" style="margin-bottom: 1.25rem;">02 — The Vision</p>
+                <h2 class="vision-lead reveal" id="visionText">
+                    What if creation was <span class="accent-violet">continuous</span>?
+                </h2>
+                <p class="vision-sublead reveal">
+                    One unified platform that understands both the digital and the physical — turning fragmented handoffs into a single creative flow.
+                </p>
+
+                <div class="vision-cards">
+                    <!-- Beat 1: Software -->
+                    <div class="vision-card vision-card--cyan reveal">
+                        <div class="vision-card-tag">01 · Digital</div>
+                        <h3 class="vision-card-title">Where a sketch becomes software.</h3>
+                        <p class="vision-card-desc">
+                            Draw a mockup or describe an idea. Full production interfaces, clean backend logic, and automated deployment in minutes.
+                        </p>
+                        <div class="vision-card-flow">
+                            <span>Sketch</span> <span>→</span> <span>Code</span> <span>→</span> <span>Ship</span>
+                        </div>
+                    </div>
+
+                    <!-- Beat 2: Hardware -->
+                    <div class="vision-card vision-card--magenta reveal">
+                        <div class="vision-card-tag">02 · Physical</div>
+                        <h3 class="vision-card-title">Where a diagram becomes a circuit.</h3>
+                        <p class="vision-card-desc">
+                            Connect logical blocks visually. Real component libraries, auto-routed schematics, and files ready for physical fabrication.
+                        </p>
+                        <div class="vision-card-flow">
+                            <span>Diagram</span> <span>→</span> <span>Schematic</span> <span>→</span> <span>PCB</span>
+                        </div>
+                    </div>
+
+                    <!-- Beat 3: Synthesis -->
+                    <div class="vision-card vision-card--violet reveal">
+                        <div class="vision-card-tag">03 · Convergence</div>
+                        <h3 class="vision-card-title">Where the boundary disappears.</h3>
+                        <p class="vision-card-desc">
+                            Bits and atoms engineered in one environment. Create connected physical devices and companion software simultaneously.
+                        </p>
+                        <div class="vision-card-flow">
+                            <span>Bits</span> <span>×</span> <span>Atoms</span> <span>→</span> <span>One Reality</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="vision-footer-quote reveal">
+                    "Every handoff is a translation. Every translation is a loss. We make creation seamless."
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         03 — MARKET OPPORTUNITY
+         ═══════════════════════════════════════ -->
+    <section class="market" id="market">
+        <div class="container">
+            <div class="market-intro">
+                <div class="section-rule reveal" style="margin: 0 auto 1.5rem;"></div>
+                <p class="label reveal" style="margin-bottom: 1rem;">03 — The Opportunity</p>
+                <h2 class="headline headline--lg reveal">
+                    A <span class="accent-orange">$200B+</span> Market Waiting to Converge
+                </h2>
+                <p class="serif-statement reveal" style="max-width: 650px; margin: 1.5rem auto 0;">
+                    Two massive industries — software creation and hardware design — are growing fast, but nobody has unified them. Until now.
+                </p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card reveal">
+                    <div class="stat-number">$187B</div>
+                    <div class="stat-label">Low-code & no-code software creation market by 2030</div>
+                    <div class="stat-source">Grand View Research, CAGR ~26%</div>
+                </div>
+                <div class="stat-card reveal">
+                    <div class="stat-number">$35B+</div>
+                    <div class="stat-label">Electronic Design Automation market by 2030, growing at 10% CAGR</div>
+                    <div class="stat-source">Fortune Business Insights</div>
+                </div>
+                <div class="stat-card reveal">
+                    <div class="stat-number">$294B</div>
+                    <div class="stat-label">Physical AI market projected by 2035 — the convergence layer</div>
+                    <div class="stat-source">Astute Analytica, NVIDIA Strategic Reports</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         04 — THE TWO PILLARS
+         ═══════════════════════════════════════ -->
+    <section class="pillars" id="pillars">
+        <div class="container">
+            <div class="section-header" style="text-align: center; margin-bottom: clamp(4rem, 8vh, 7rem);">
+                <div class="section-rule reveal" style="margin: 0 auto 1.5rem;"></div>
+                <p class="label reveal" style="margin-bottom: 1rem;">04 — The Platform</p>
+                <h2 class="headline headline--lg reveal">Two Pillars. <span class="accent-orange">One Vision.</span></h2>
+            </div>
+
+            <!-- Software Pillar -->
+            <div class="pillar-row">
+                <div class="pillar-content">
+                    <p class="label label--cyan reveal">The Digital Side</p>
+                    <h3 class="headline headline--md reveal">
+                        The next great application will be <span class="accent-cyan">born here.</span>
+                    </h3>
+                    <p class="body-text reveal">
+                        From a hand-drawn sketch or a single sentence, Sketch2Scale generates full production software — interfaces, logic, and deployment. No handoffs between designers and developers. No fragmented toolchains. One continuous creative flow.
+                    </p>
+                    <div class="pillar-features reveal">
+                        <div class="pillar-feature"><span class="marker marker--cyan"></span> Sketch or describe → full application in minutes</div>
+                        <div class="pillar-feature"><span class="marker marker--cyan"></span> Interface, backend, and deployment — unified</div>
+                        <div class="pillar-feature"><span class="marker marker--cyan"></span> Iterate at the speed of thought</div>
+                    </div>
+                </div>
+                <div class="pillar-visual pillar-visual--software reveal">
+                    <img src="sketch2scale-software.jpg" alt="Sketch2Scale Software Canvas — Idea to Production App" class="pillar-visual-img" loading="lazy">
+                    <div class="pillar-badge-overlay pillar-badge-overlay--cyan">
+                        <span class="badge-dot"></span>
+                        <span>Sketch2Scale · Software Engine</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hardware Pillar -->
+            <div class="pillar-row pillar-row--reverse">
+                <div class="pillar-content">
+                    <p class="label label--magenta reveal">The Physical Side</p>
+                    <h3 class="headline headline--md reveal">
+                        From circuit to <span class="accent-magenta">creation.</span>
+                    </h3>
+                    <p class="body-text reveal">
+                        Hardware design reimagined for the modern era. Component selection, circuit architecture, wiring diagrams — all in one seamless environment. Starting with an intelligent design companion, evolving into a complete path from screen to physical manufacturing.
+                    </p>
+                    <div class="pillar-features reveal">
+                        <div class="pillar-feature"><span class="marker marker--magenta"></span> Intelligent hardware design assistance</div>
+                        <div class="pillar-feature"><span class="marker marker--magenta"></span> Real component libraries with verified data</div>
+                        <div class="pillar-feature"><span class="marker marker--magenta"></span> Path to physical manufacturing integration</div>
+                    </div>
+                </div>
+                <div class="pillar-visual pillar-visual--hardware reveal">
+                    <img src="sketch2scale-hardware.jpg" alt="Sketch2Scale Hardware Studio — Schematic to Physical PCB" class="pillar-visual-img" loading="lazy">
+                    <div class="pillar-badge-overlay pillar-badge-overlay--magenta">
+                        <span class="badge-dot"></span>
+                        <span>Sketch2Scale · Hardware Engine</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         05 — THE JUNCTION
+         ═══════════════════════════════════════ -->
+    <section class="junction" id="junction">
+        <div class="junction-bg"></div>
+        <div class="junction-content">
+            <div class="section-rule reveal" style="margin: 0 auto 1.5rem;"></div>
+            <p class="label reveal" style="margin-bottom: 2rem;">05 — The Convergence</p>
+            <h2 class="headline headline--xl reveal" style="margin-bottom: 1rem;">
+                Where <span class="accent-cyan">software</span> meets <span style="color: var(--magenta);">hardware.</span>
+            </h2>
+            <p class="serif-statement reveal" style="max-width: 700px; margin: 0 auto;">
+                The products that change industries — smart devices, connected machines, intelligent systems — live at the intersection of digital and physical. We are building that intersection.
+            </p>
+            <div class="junction-convergence" id="convergence">
+                <div class="convergence-line convergence-line--left"></div>
+                <div class="convergence-dot"></div>
+                <div class="convergence-line convergence-line--right"></div>
+            </div>
+            <p class="body-text reveal" style="margin: 0 auto; text-align: center; max-width: 580px;">
+                Physical AI — machines that perceive, reason, and act in the real world — represents the next trillion-dollar platform shift. Sketch2Scale is the creation layer for this new era. One platform where a single idea becomes both the app and the device.
+            </p>
+            <blockquote class="junction-quote reveal">
+                "The next wave of AI is physical AI — AI that understands the laws of physics and can work among us."
+                <cite>Jensen Huang — CEO, NVIDIA</cite>
+            </blockquote>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         06 — WHY NOW
+         ═══════════════════════════════════════ -->
+    <section class="why-now" id="whynow">
+        <div class="container">
+            <div class="section-header" style="text-align: center; margin-bottom: clamp(3rem, 6vh, 5rem);">
+                <div class="section-rule reveal" style="margin: 0 auto 1.5rem;"></div>
+                <p class="label reveal" style="margin-bottom: 1rem;">06 — Why Now</p>
+                <h2 class="headline headline--lg reveal">
+                    Four shifts. <span class="accent-lime">One moment.</span>
+                </h2>
+            </div>
+            <div class="why-grid">
+                <div class="why-card reveal">
+                    <div class="why-card-number">01</div>
+                    <h3 class="why-card-title">The Great Developer Shortage</h3>
+                    <p class="why-card-text">85 million skilled tech workers will be missing by 2030. Companies can't hire fast enough. The answer isn't more developers — it's making creation accessible to everyone with an idea.</p>
+                </div>
+                <div class="why-card reveal">
+                    <div class="why-card-number">02</div>
+                    <h3 class="why-card-title">AI Has Matured — Finally</h3>
+                    <p class="why-card-text">For the first time, AI can understand intent and translate it into working systems. Not just generating code snippets, but architecting complete products. The gap between "I have an idea" and "I have a product" has never been smaller.</p>
+                </div>
+                <div class="why-card reveal">
+                    <div class="why-card-number">03</div>
+                    <h3 class="why-card-title">Physical AI is Real</h3>
+                    <p class="why-card-text">NVIDIA, Google, and Tesla are racing to build the infrastructure for machines that operate in the real world. But there's no creation platform for this new category of products — yet.</p>
+                </div>
+                <div class="why-card reveal">
+                    <div class="why-card-number">04</div>
+                    <h3 class="why-card-title">Hardware Got Accessible</h3>
+                    <p class="why-card-text">PCB fabrication is cheap and fast. Microcontrollers are powerful and affordable. Component ecosystems are mature. The barrier to building physical products has collapsed — but the design tools haven't kept up.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         07 — ROADMAP
+         ═══════════════════════════════════════ -->
+    <section class="roadmap" id="roadmap">
+        <div class="container">
+            <div class="section-header" style="text-align: center; margin-bottom: clamp(3rem, 6vh, 5rem);">
+                <div class="section-rule reveal" style="margin: 0 auto 1.5rem;"></div>
+                <p class="label reveal" style="margin-bottom: 1rem;">07 — The Path Forward</p>
+                <h2 class="headline headline--lg reveal">
+                    Three phases to <span class="accent-orange">reshape creation.</span>
+                </h2>
+            </div>
+            <div class="phases">
+                <div class="phase reveal">
+                    <div class="phase-label">Phase I — Foundation</div>
+                    <h3 class="phase-title">Set the <span class="accent-orange">Standard</span></h3>
+                    <p class="phase-text">Build the best-in-class creation tools for both software and hardware individually. Launch the platform. Earn the trust of early creators. Prove that one person with an idea can ship a real product.</p>
+                </div>
+                <div class="phase reveal">
+                    <div class="phase-label">Phase II — Convergence</div>
+                    <h3 class="phase-title">Build the <span class="accent-cyan">Junction</span></h3>
+                    <p class="phase-text">Unite both halves. A smart home device designed in one session — the app and the hardware together. The firmware and the interface, generated in tandem. One vision, one workflow, one product.</p>
+                </div>
+                <div class="phase reveal">
+                    <div class="phase-label">Phase III — Scale</div>
+                    <h3 class="phase-title">From Screen to <span class="accent-magenta">Factory</span></h3>
+                    <p class="phase-text">Close the loop with integrated manufacturing. From your screen to a physical product in your hands. The complete journey — sketch to scale — realized. No middlemen. No friction.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         08 — IMPACT
+         ═══════════════════════════════════════ -->
+    <section class="impact" id="impact">
+        <div class="container">
+            <div class="section-header" style="max-width: 700px;">
+                <div class="section-rule reveal"></div>
+                <p class="label reveal" style="margin-bottom: 1rem;">08 — Why This Matters</p>
+                <h2 class="headline headline--lg reveal">
+                    Beyond a product. <span class="accent-yellow">A new paradigm.</span>
+                </h2>
+                <p class="body-text reveal" style="margin-top: 1rem;">
+                    Sketch2Scale isn't just building a company. It's pioneering a new discipline — the unification of digital and physical creation — with implications across education, research, and industry.
+                </p>
+            </div>
+            <div class="impact-grid">
+                <div class="impact-card reveal">
+                    <h4 class="impact-card-title">Interdisciplinary Innovation</h4>
+                    <p class="impact-card-text">Sketch2Scale sits at the intersection of computer science, electrical engineering, design, and manufacturing — creating a new field that transcends traditional department boundaries. A platform purpose-built for the multidisciplinary teams of tomorrow.</p>
+                </div>
+                <div class="impact-card reveal">
+                    <h4 class="impact-card-title">Democratizing Creation</h4>
+                    <p class="impact-card-text">When building a product no longer requires a team of specialists, the creative output of humanity multiplies. Students, researchers, hobbyists, and entrepreneurs in any field can turn ideas into reality — regardless of their technical background.</p>
+                </div>
+                <div class="impact-card reveal">
+                    <h4 class="impact-card-title">Real-World Impact</h4>
+                    <p class="impact-card-text">From healthcare devices built by clinicians who understand patient needs, to agricultural tools designed by farmers — Sketch2Scale enables domain experts to become product creators. The best ideas often come from the people closest to the problem.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         CLOSE / GET IN TOUCH
+         ═══════════════════════════════════════ -->
+    <section class="close-section" id="contact">
+        <div class="close-content">
+            <p class="close-pre reveal">We're not building a better tool.</p>
+            <h2 class="close-headline reveal">
+                We're building the future of <span class="accent-orange">how things are made.</span>
+            </h2>
+            <p class="close-subtext reveal">
+                Ready to collaborate, invest, or build with us? Connect directly via email or mobile:
+            </p>
+
+            <div class="contact-grid reveal">
+                <!-- Option 1: Direct Email -->
+                <div class="contact-card contact-card--email">
+                    <div class="contact-card-badge">Direct Email</div>
+                    <div class="contact-card-value">rahulprasadcorporation@gmail.com</div>
+                    <p class="contact-card-note">
+                        Direct channel for partnerships, investor relations, and project collaborations.
+                    </p>
+                    <div class="contact-actions">
+                        <a href="mailto:rahulprasadcorporation@gmail.com?subject=Inquiry%20-%20Sketch2Scale" class="btn-contact btn-contact--primary hoverable">
+                            Send Email ↗
+                        </a>
+                        <button type="button" class="btn-contact btn-contact--ghost hoverable copy-btn" data-copy="rahulprasadcorporation@gmail.com">
+                            Copy Email
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Option 2: Mobile & WhatsApp -->
+                <div class="contact-card contact-card--phone">
+                    <div class="contact-card-badge">Mobile & WhatsApp</div>
+                    <div class="contact-card-value">+91 8653454495</div>
+                    <p class="contact-card-note">
+                        Available for direct calls, urgent inquiries, and real-time WhatsApp discussions.
+                    </p>
+                    <div class="contact-actions">
+                        <a href="tel:+918653454495" class="btn-contact btn-contact--primary hoverable">
+                            Call Now 📞
+                        </a>
+                        <a href="https://wa.me/918653454495?text=Hi%20Rahul,%20reaching%20out%20about%20Sketch2Scale" target="_blank" rel="noopener" class="btn-contact btn-contact--whatsapp hoverable">
+                            WhatsApp 💬
+                        </a>
+                        <button type="button" class="btn-contact btn-contact--ghost hoverable copy-btn" data-copy="+918653454495">
+                            Copy Number
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="close-watermark" aria-hidden="true">SKETCH2SCALE</div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         CONTACT MODAL
+         ═══════════════════════════════════════ -->
+    <div class="contact-modal-backdrop" id="contactModal" aria-hidden="true">
+        <div class="contact-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <button class="modal-close-btn hoverable" id="closeModalBtn" aria-label="Close modal">&times;</button>
+            <h3 class="modal-title" id="modalTitle">Get in Touch</h3>
+            <p class="modal-sub">Choose your preferred channel to connect directly with Rahul:</p>
+
+            <div class="modal-options">
+                <!-- Modal Option 1: Email -->
+                <div class="modal-option-card">
+                    <div class="modal-option-header">
+                        <span class="modal-option-tag modal-option-tag--email">Email</span>
+                    </div>
+                    <div class="modal-option-val">rahulprasadcorporation@gmail.com</div>
+                    <div class="contact-actions" style="margin-top: 0.5rem;">
+                        <a href="mailto:rahulprasadcorporation@gmail.com?subject=Inquiry%20-%20Sketch2Scale" class="btn-contact btn-contact--primary hoverable">
+                            Send Email ↗
+                        </a>
+                        <button type="button" class="btn-contact btn-contact--ghost hoverable copy-btn" data-copy="rahulprasadcorporation@gmail.com">
+                            Copy Email
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal Option 2: Mobile & WhatsApp -->
+                <div class="modal-option-card">
+                    <div class="modal-option-header">
+                        <span class="modal-option-tag modal-option-tag--phone">Mobile & WhatsApp</span>
+                    </div>
+                    <div class="modal-option-val">+91 8653454495</div>
+                    <div class="contact-actions" style="margin-top: 0.5rem;">
+                        <a href="tel:+918653454495" class="btn-contact btn-contact--primary hoverable">
+                            Call 📞
+                        </a>
+                        <a href="https://wa.me/918653454495?text=Hi%20Rahul,%20reaching%20out%20about%20Sketch2Scale" target="_blank" rel="noopener" class="btn-contact btn-contact--whatsapp hoverable">
+                            WhatsApp 💬
+                        </a>
+                        <button type="button" class="btn-contact btn-contact--ghost hoverable copy-btn" data-copy="+918653454495">
+                            Copy Number
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         FOOTER
+         ═══════════════════════════════════════ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-left">© 2026 Sketch2Scale. All rights reserved.</div>
+            <div class="footer-right">
+                <a href="#vision" class="footer-link hoverable">Vision</a>
+                <a href="#market" class="footer-link hoverable">Market</a>
+                <a href="#roadmap" class="footer-link hoverable">Roadmap</a>
+                <a href="#contact" class="footer-link hoverable open-contact-modal">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- ═══════════════════════════════════════
+         SCRIPTS
+         ═══════════════════════════════════════ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        /* ═══ CUSTOM CURSOR ═══ */
+        const cursorDot = document.getElementById('cursorDot');
+        let mouseX = 0, mouseY = 0, dotX = 0, dotY = 0;
+        if (window.matchMedia('(hover: hover)').matches) {
+            document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+            function animateCursor() {
+                dotX += (mouseX - dotX) * 0.15;
+                dotY += (mouseY - dotY) * 0.15;
+                cursorDot.style.left = dotX + 'px';
+                cursorDot.style.top = dotY + 'px';
+                requestAnimationFrame(animateCursor);
+            }
+            animateCursor();
+            document.querySelectorAll('.hoverable, a, button').forEach(el => {
+                el.addEventListener('mouseenter', () => cursorDot.classList.add('hovering'));
+                el.addEventListener('mouseleave', () => cursorDot.classList.remove('hovering'));
+            });
+        } else { cursorDot.style.display = 'none'; }
+
+        /* ═══ NAV SCROLL ═══ */
+        ScrollTrigger.create({
+            start: 'top -80',
+            onUpdate: (self) => {
+                document.getElementById('mainNav').classList.toggle('scrolled', self.progress > 0);
+            }
+        });
+
+        /* ═══ HERO ANIMATION ═══ */
+        const heroTl = gsap.timeline({ delay: 0.3 });
+        heroTl
+            .to('.hero-title .line span', { y: 0, duration: 1.2, ease: 'power4.out', stagger: 0.12 })
+            .to('#heroBadge', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.6')
+            .to('#heroTagline', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
+            .to('#heroScroll', { opacity: 1, duration: 0.6, ease: 'power2.out' }, '-=0.3');
+
+        /* ═══ SCROLL REVEALS ═══ */
+        gsap.utils.toArray('.reveal').forEach((el) => {
+            gsap.fromTo(el,
+                { opacity: 0, y: 40 },
+                { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
+                  scrollTrigger: { trigger: el, start: 'top 85%', once: true }
+                }
+            );
+        });
+
+        /* ═══ JUNCTION CONVERGENCE ═══ */
+        ScrollTrigger.create({
+            trigger: '#junction', start: 'top 60%', once: true,
+            onEnter: () => document.querySelector('.junction').classList.add('active')
+        });
+
+        /* ═══ STAT COUNTER ═══ */
+        document.querySelectorAll('.stat-number').forEach((el) => {
+            const text = el.textContent;
+            const match = text.match(/([\$]?)([\d.]+)([A-Za-z+%]*)/);
+            if (!match) return;
+            const prefix = match[1], targetNum = parseFloat(match[2]), suffix = match[3];
+            el.textContent = prefix + '0' + suffix;
+            ScrollTrigger.create({
+                trigger: el, start: 'top 80%', once: true,
+                onEnter: () => {
+                    gsap.to({ val: 0 }, {
+                        val: targetNum, duration: 2, ease: 'power2.out',
+                        onUpdate: function() {
+                            const current = this.targets()[0].val;
+                            el.textContent = targetNum >= 100
+                                ? prefix + Math.round(current) + suffix
+                                : prefix + current.toFixed(targetNum % 1 !== 0 ? 1 : 0) + suffix;
+                        }
+                    });
+                }
+            });
+        });
+
+        /* ═══ CONTACT MODAL LOGIC ═══ */
+        const contactModal = document.getElementById('contactModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        function openContactModal() {
+            contactModal.classList.add('open');
+            contactModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeContactModal() {
+            contactModal.classList.remove('open');
+            contactModal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', closeContactModal);
+        }
+
+        contactModal.addEventListener('click', (e) => {
+            if (e.target === contactModal) closeContactModal();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && contactModal.classList.contains('open')) {
+                closeContactModal();
+            }
+        });
+
+        document.querySelectorAll('.open-contact-modal').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                openContactModal();
+            });
+        });
+
+        /* ═══ CLIPBOARD COPY ═══ */
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const textToCopy = btn.getAttribute('data-copy');
+                if (!textToCopy) return;
+                try {
+                    await navigator.clipboard.writeText(textToCopy);
+                    const originalText = btn.textContent;
+                    btn.textContent = '✓ Copied!';
+                    btn.style.color = '#4ADE80';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.color = '';
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy', err);
+                }
+            });
+        });
+
+        /* ═══ SMOOTH ANCHORS & GET IN TOUCH ═══ */
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const targetId = this.getAttribute('href');
+                if (targetId === '#contact') {
+                    // Smooth scroll to contact and also open modal for direct choices
+                    e.preventDefault();
+                    const target = document.querySelector(targetId);
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    openContactModal();
+                    return;
+                }
+                e.preventDefault();
+                const target = document.querySelector(targetId);
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        /* ═══ PARALLAX HERO ═══ */
+        gsap.to('.hero-grid', {
+            y: 150, ease: 'none',
+            scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
+        });
+    </script>
+
+</body>
+</html>
